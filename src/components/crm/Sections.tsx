@@ -1,3 +1,4 @@
+import { useState } from "react";
 import Icon from "@/components/ui/icon";
 import { ORDERS, CATALOG, CLIENTS, CONTENT_ITEMS, statusColor } from "./data";
 
@@ -140,27 +141,83 @@ export function DashboardSection() {
 }
 
 /* ── Orders ─────────────────────────────────────────────── */
+const STATUS_OPTIONS = ["Все статусы", "В работе", "Готов", "Ожидает", "Доставлен"];
+
 export function OrdersSection() {
+  const [query, setQuery] = useState("");
+  const [status, setStatus] = useState("Все статусы");
+
+  const filtered = ORDERS.filter((o) => {
+    const matchesQuery =
+      query === "" ||
+      o.id.toLowerCase().includes(query.toLowerCase()) ||
+      o.client.toLowerCase().includes(query.toLowerCase()) ||
+      o.product.toLowerCase().includes(query.toLowerCase());
+    const matchesStatus = status === "Все статусы" || o.status === status;
+    return matchesQuery && matchesStatus;
+  });
+
   return (
     <div className="space-y-5">
       <div className="flex gap-3">
-        <input
-          placeholder="Поиск заказа..."
-          className="flex-1 px-4 py-2 rounded text-sm outline-none"
-          style={{ background: "hsl(20 8% 9%)", border: "1px solid hsl(20 8% 16%)", color: "hsl(40 15% 80%)" }}
-        />
+        <div className="relative flex-1">
+          <Icon
+            name="Search"
+            size={14}
+            className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
+            style={{ color: "hsl(40 10% 40%)" }}
+          />
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Поиск по номеру, клиенту, изделию..."
+            className="w-full pl-8 pr-4 py-2 rounded text-sm outline-none"
+            style={{ background: "hsl(20 8% 9%)", border: "1px solid hsl(20 8% 16%)", color: "hsl(40 15% 80%)" }}
+          />
+          {query && (
+            <button
+              onClick={() => setQuery("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors"
+              style={{ color: "hsl(40 10% 40%)" }}
+            >
+              <Icon name="X" size={13} />
+            </button>
+          )}
+        </div>
         <select
+          value={status}
+          onChange={(e) => setStatus(e.target.value)}
           className="px-4 py-2 rounded text-sm outline-none"
           style={{ background: "hsl(20 8% 9%)", border: "1px solid hsl(20 8% 16%)", color: "hsl(40 10% 55%)" }}
         >
-          <option>Все статусы</option>
-          <option>В работе</option>
-          <option>Готов</option>
-          <option>Ожидает</option>
-          <option>Доставлен</option>
+          {STATUS_OPTIONS.map((s) => (
+            <option key={s}>{s}</option>
+          ))}
         </select>
       </div>
-      <OrdersTable rows={ORDERS} />
+
+      {filtered.length > 0 ? (
+        <>
+          <OrdersTable rows={filtered} />
+          <p className="text-xs" style={{ color: "hsl(40 10% 40%)" }}>
+            Показано {filtered.length} из {ORDERS.length} заказов
+          </p>
+        </>
+      ) : (
+        <div
+          className="flex flex-col items-center justify-center py-16 rounded"
+          style={{ border: "1px solid hsl(20 8% 13%)" }}
+        >
+          <Icon name="SearchX" size={32} style={{ color: "hsl(40 10% 30%)" }} />
+          <p className="mt-3 text-sm" style={{ color: "hsl(40 10% 45%)" }}>Заказов не найдено</p>
+          <button
+            onClick={() => { setQuery(""); setStatus("Все статусы"); }}
+            className="mt-3 text-xs text-gold hover:underline"
+          >
+            Сбросить фильтры
+          </button>
+        </div>
+      )}
     </div>
   );
 }
