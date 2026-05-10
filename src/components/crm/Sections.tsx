@@ -223,119 +223,220 @@ export function OrdersSection() {
 }
 
 /* ── Catalog ─────────────────────────────────────────────── */
+const CATEGORY_OPTIONS = ["Все категории", "Кресты", "Надгробия", "С портретом", "Ограды", "Плиты"];
+
 export function CatalogSection() {
+  const [query, setQuery] = useState("");
+  const [category, setCategory] = useState("Все категории");
+
+  const filtered = CATALOG.filter((p) => {
+    const matchesQuery =
+      query === "" ||
+      p.name.toLowerCase().includes(query.toLowerCase()) ||
+      p.category.toLowerCase().includes(query.toLowerCase());
+    const matchesCategory = category === "Все категории" || p.category === category;
+    return matchesQuery && matchesCategory;
+  });
+
   return (
     <div className="space-y-5">
       <div className="flex gap-3">
-        <input
-          placeholder="Поиск в каталоге..."
-          className="flex-1 px-4 py-2 rounded text-sm outline-none"
-          style={{ background: "hsl(20 8% 9%)", border: "1px solid hsl(20 8% 16%)", color: "hsl(40 15% 80%)" }}
-        />
+        <div className="relative flex-1">
+          <Icon
+            name="Search"
+            size={14}
+            className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
+            style={{ color: "hsl(40 10% 40%)" }}
+          />
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Поиск по названию или категории..."
+            className="w-full pl-8 pr-4 py-2 rounded text-sm outline-none"
+            style={{ background: "hsl(20 8% 9%)", border: "1px solid hsl(20 8% 16%)", color: "hsl(40 15% 80%)" }}
+          />
+          {query && (
+            <button
+              onClick={() => setQuery("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors"
+              style={{ color: "hsl(40 10% 40%)" }}
+            >
+              <Icon name="X" size={13} />
+            </button>
+          )}
+        </div>
         <select
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
           className="px-4 py-2 rounded text-sm outline-none"
           style={{ background: "hsl(20 8% 9%)", border: "1px solid hsl(20 8% 16%)", color: "hsl(40 10% 55%)" }}
         >
-          <option>Все категории</option>
-          <option>Кресты</option>
-          <option>Надгробия</option>
-          <option>С портретом</option>
-          <option>Ограды</option>
-          <option>Плиты</option>
+          {CATEGORY_OPTIONS.map((c) => <option key={c}>{c}</option>)}
         </select>
       </div>
-      <div className="rounded overflow-hidden" style={{ border: "1px solid hsl(20 8% 13%)" }}>
-        <table className="w-full data-table">
-          <thead style={{ background: "hsl(20 8% 8%)" }}>
-            <tr>
-              <th>Наименование</th>
-              <th>Категория</th>
-              <th>Цена</th>
-              <th>Остаток</th>
-              <th>Статус</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {CATALOG.map((p) => (
-              <tr key={p.name} style={{ cursor: "pointer" }}>
-                <td className="font-medium">{p.name}</td>
-                <td style={{ color: "hsl(40 10% 55%)" }}>{p.category}</td>
-                <td style={{ color: "hsl(38 60% 65%)" }}>{p.price}</td>
-                <td style={{ color: p.stock === 0 ? "hsl(0 62% 50%)" : p.stock < 5 ? "hsl(38 60% 65%)" : "hsl(40 15% 70%)" }}>
-                  {p.stock === 0 ? "—" : `${p.stock} шт.`}
-                </td>
-                <td>
-                  <span className={`badge-status ${statusColor[p.status]}`}>{p.status}</span>
-                </td>
-                <td>
-                  <div className="flex gap-2">
-                    <button style={{ color: "hsl(40 10% 40%)" }} className="hover:text-gold transition-colors">
-                      <Icon name="Pencil" size={13} />
-                    </button>
-                    <button style={{ color: "hsl(40 10% 40%)" }} className="hover:text-red-400 transition-colors">
-                      <Icon name="Trash2" size={13} />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+
+      {filtered.length > 0 ? (
+        <>
+          <div className="rounded overflow-hidden" style={{ border: "1px solid hsl(20 8% 13%)" }}>
+            <table className="w-full data-table">
+              <thead style={{ background: "hsl(20 8% 8%)" }}>
+                <tr>
+                  <th>Наименование</th>
+                  <th>Категория</th>
+                  <th>Цена</th>
+                  <th>Остаток</th>
+                  <th>Статус</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map((p) => (
+                  <tr key={p.name} style={{ cursor: "pointer" }}>
+                    <td className="font-medium">{p.name}</td>
+                    <td style={{ color: "hsl(40 10% 55%)" }}>{p.category}</td>
+                    <td style={{ color: "hsl(38 60% 65%)" }}>{p.price}</td>
+                    <td style={{ color: p.stock === 0 ? "hsl(0 62% 50%)" : p.stock < 5 ? "hsl(38 60% 65%)" : "hsl(40 15% 70%)" }}>
+                      {p.stock === 0 ? "—" : `${p.stock} шт.`}
+                    </td>
+                    <td>
+                      <span className={`badge-status ${statusColor[p.status]}`}>{p.status}</span>
+                    </td>
+                    <td>
+                      <div className="flex gap-2">
+                        <button style={{ color: "hsl(40 10% 40%)" }} className="hover:text-gold transition-colors">
+                          <Icon name="Pencil" size={13} />
+                        </button>
+                        <button style={{ color: "hsl(40 10% 40%)" }} className="hover:text-red-400 transition-colors">
+                          <Icon name="Trash2" size={13} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="text-xs" style={{ color: "hsl(40 10% 40%)" }}>
+            Показано {filtered.length} из {CATALOG.length} позиций
+          </p>
+        </>
+      ) : (
+        <div
+          className="flex flex-col items-center justify-center py-16 rounded"
+          style={{ border: "1px solid hsl(20 8% 13%)" }}
+        >
+          <Icon name="SearchX" size={32} style={{ color: "hsl(40 10% 30%)" }} />
+          <p className="mt-3 text-sm" style={{ color: "hsl(40 10% 45%)" }}>Позиций не найдено</p>
+          <button
+            onClick={() => { setQuery(""); setCategory("Все категории"); }}
+            className="mt-3 text-xs text-gold hover:underline"
+          >
+            Сбросить фильтры
+          </button>
+        </div>
+      )}
     </div>
   );
 }
 
 /* ── Clients ─────────────────────────────────────────────── */
 export function ClientsSection() {
+  const [query, setQuery] = useState("");
+
+  const filtered = CLIENTS.filter((c) =>
+    query === "" ||
+    c.name.toLowerCase().includes(query.toLowerCase()) ||
+    c.phone.includes(query)
+  );
+
   return (
     <div className="space-y-5">
-      <input
-        placeholder="Поиск клиента..."
-        className="w-full max-w-md px-4 py-2 rounded text-sm outline-none"
-        style={{ background: "hsl(20 8% 9%)", border: "1px solid hsl(20 8% 16%)", color: "hsl(40 15% 80%)" }}
-      />
-      <div className="rounded overflow-hidden" style={{ border: "1px solid hsl(20 8% 13%)" }}>
-        <table className="w-full data-table">
-          <thead style={{ background: "hsl(20 8% 8%)" }}>
-            <tr>
-              <th>Клиент</th>
-              <th>Телефон</th>
-              <th>Заказов</th>
-              <th>Сумма всего</th>
-              <th>Последний заказ</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {CLIENTS.map((c) => (
-              <tr key={c.name} style={{ cursor: "pointer" }}>
-                <td>
-                  <div className="flex items-center gap-3">
-                    <div
-                      className="w-7 h-7 rounded-full flex items-center justify-center text-xs flex-shrink-0"
-                      style={{ background: "hsl(38 60% 65% / 0.15)", color: "hsl(38 60% 65%)" }}
-                    >
-                      {c.name.charAt(0)}
-                    </div>
-                    <span className="font-medium">{c.name}</span>
-                  </div>
-                </td>
-                <td style={{ color: "hsl(40 10% 55%)" }} className="font-mono text-xs">{c.phone}</td>
-                <td style={{ color: "hsl(40 15% 75%)" }}>{c.orders}</td>
-                <td style={{ color: "hsl(38 60% 65%)" }} className="font-medium">{c.total}</td>
-                <td style={{ color: "hsl(40 10% 50%)" }}>{c.last}</td>
-                <td>
-                  <button style={{ color: "hsl(40 10% 40%)" }} className="hover:text-gold transition-colors">
-                    <Icon name="ChevronRight" size={14} />
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="relative w-full max-w-md">
+        <Icon
+          name="Search"
+          size={14}
+          className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
+          style={{ color: "hsl(40 10% 40%)" }}
+        />
+        <input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Поиск по имени или телефону..."
+          className="w-full pl-8 pr-4 py-2 rounded text-sm outline-none"
+          style={{ background: "hsl(20 8% 9%)", border: "1px solid hsl(20 8% 16%)", color: "hsl(40 15% 80%)" }}
+        />
+        {query && (
+          <button
+            onClick={() => setQuery("")}
+            className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors"
+            style={{ color: "hsl(40 10% 40%)" }}
+          >
+            <Icon name="X" size={13} />
+          </button>
+        )}
       </div>
+
+      {filtered.length > 0 ? (
+        <>
+          <div className="rounded overflow-hidden" style={{ border: "1px solid hsl(20 8% 13%)" }}>
+            <table className="w-full data-table">
+              <thead style={{ background: "hsl(20 8% 8%)" }}>
+                <tr>
+                  <th>Клиент</th>
+                  <th>Телефон</th>
+                  <th>Заказов</th>
+                  <th>Сумма всего</th>
+                  <th>Последний заказ</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map((c) => (
+                  <tr key={c.name} style={{ cursor: "pointer" }}>
+                    <td>
+                      <div className="flex items-center gap-3">
+                        <div
+                          className="w-7 h-7 rounded-full flex items-center justify-center text-xs flex-shrink-0"
+                          style={{ background: "hsl(38 60% 65% / 0.15)", color: "hsl(38 60% 65%)" }}
+                        >
+                          {c.name.charAt(0)}
+                        </div>
+                        <span className="font-medium">{c.name}</span>
+                      </div>
+                    </td>
+                    <td style={{ color: "hsl(40 10% 55%)" }} className="font-mono text-xs">{c.phone}</td>
+                    <td style={{ color: "hsl(40 15% 75%)" }}>{c.orders}</td>
+                    <td style={{ color: "hsl(38 60% 65%)" }} className="font-medium">{c.total}</td>
+                    <td style={{ color: "hsl(40 10% 50%)" }}>{c.last}</td>
+                    <td>
+                      <button style={{ color: "hsl(40 10% 40%)" }} className="hover:text-gold transition-colors">
+                        <Icon name="ChevronRight" size={14} />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="text-xs" style={{ color: "hsl(40 10% 40%)" }}>
+            Показано {filtered.length} из {CLIENTS.length} клиентов
+          </p>
+        </>
+      ) : (
+        <div
+          className="flex flex-col items-center justify-center py-16 rounded"
+          style={{ border: "1px solid hsl(20 8% 13%)" }}
+        >
+          <Icon name="SearchX" size={32} style={{ color: "hsl(40 10% 30%)" }} />
+          <p className="mt-3 text-sm" style={{ color: "hsl(40 10% 45%)" }}>Клиенты не найдены</p>
+          <button
+            onClick={() => setQuery("")}
+            className="mt-3 text-xs text-gold hover:underline"
+          >
+            Сбросить поиск
+          </button>
+        </div>
+      )}
     </div>
   );
 }
