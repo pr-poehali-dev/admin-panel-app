@@ -1,0 +1,24 @@
+{
+  "name": "Мемориал — Панель управления",
+  "short_name": "Мемориал",
+  "description": "CRM для управления заказами памятников",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f0d0b",
+  "theme_color": "#0f0d0b",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "https://cdn.poehali.dev/projects/1b339399-073a-4ec9-a535-223f3cb27836/files/363a0b90-40ac-4a3a-8f31-8a78975dc7c0.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://cdn.poehali.dev/projects/1b339399-073a-4ec9-a535-223f3cb27836/files/363a0b90-40ac-4a3a-8f31-8a78975dc7c0.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "any"
+    }
+  ]
+}

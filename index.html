@@ -10,6 +10,13 @@
     <meta name="description" content="Poehali.dev — запусти свой сайт за минуту!"/>
     <meta name="author" content="poehali.dev"/>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Мемориал">
+    <meta name="theme-color" content="#0f0d0b">
+    <link rel="apple-touch-icon" href="https://cdn.poehali.dev/projects/1b339399-073a-4ec9-a535-223f3cb27836/files/363a0b90-40ac-4a3a-8f31-8a78975dc7c0.jpg">
     <meta property="og:title" content="Поехали!">
     <meta property="og:description" content="Ваш личный программист, который делает сайты в 30 раз быстрее обычного.">
     <meta property="og:image:width" content="4800">
@@ -33,6 +40,13 @@
 <body>
 <div id="root"></div>
 <script type="module" src="/src/main.tsx"></script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js');
+    });
+  }
+</script>
 
 <!-- Yandex.Metrika counter -->
 <script type="text/javascript">
