@@ -1,6 +1,62 @@
 import { useState } from "react";
 import Icon from "@/components/ui/icon";
 import { ORDERS, CATALOG, CLIENTS, CONTENT_ITEMS, statusColor } from "./data";
+import {
+  AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
+  XAxis, YAxis, Tooltip, ResponsiveContainer,
+} from "recharts";
+
+const REVENUE_DATA = [
+  { day: "1 мая", value: 98000 },
+  { day: "2 мая", value: 134000 },
+  { day: "3 мая", value: 61000 },
+  { day: "4 мая", value: 210000 },
+  { day: "5 мая", value: 28000 },
+  { day: "6 мая", value: 175000 },
+  { day: "7 мая", value: 83500 },
+  { day: "8 мая", value: 47000 },
+  { day: "9 мая", value: 0 },
+  { day: "10 мая", value: 125000 },
+];
+
+const ORDERS_DATA = [
+  { day: "1", count: 3 },
+  { day: "2", count: 5 },
+  { day: "3", count: 2 },
+  { day: "4", count: 7 },
+  { day: "5", count: 1 },
+  { day: "6", count: 6 },
+  { day: "7", count: 4 },
+  { day: "8", count: 2 },
+  { day: "9", count: 0 },
+  { day: "10", count: 5 },
+];
+
+const CATEGORY_PIE = [
+  { name: "С портретом", value: 38 },
+  { name: "Надгробия", value: 27 },
+  { name: "Кресты", value: 18 },
+  { name: "Ограды", value: 10 },
+  { name: "Прочее", value: 7 },
+];
+const PIE_COLORS = [
+  "hsl(38 60% 65%)",
+  "hsl(38 40% 50%)",
+  "hsl(38 30% 40%)",
+  "hsl(38 20% 30%)",
+  "hsl(38 10% 22%)",
+];
+
+const CHART_TOOLTIP_STYLE = {
+  contentStyle: {
+    background: "hsl(20 8% 9%)",
+    border: "1px solid hsl(20 8% 18%)",
+    borderRadius: 4,
+    color: "hsl(40 15% 80%)",
+    fontSize: 12,
+  },
+  cursor: { fill: "hsl(38 60% 65% / 0.05)" },
+};
 
 /* ── Shared: OrdersTable ────────────────────────────────── */
 export function OrdersTable({ rows }: { rows: typeof ORDERS }) {
@@ -46,6 +102,8 @@ export function OrdersTable({ rows }: { rows: typeof ORDERS }) {
 export function DashboardSection() {
   return (
     <div className="space-y-6">
+
+      {/* Stat cards */}
       <div className="grid grid-cols-4 gap-4">
         {[
           { label: "Заказов в месяц", value: "47", delta: "+12%", icon: "ClipboardList", up: true },
@@ -55,10 +113,7 @@ export function DashboardSection() {
         ].map((s) => (
           <div key={s.label} className="stat-card">
             <div className="flex items-start justify-between mb-3">
-              <div
-                className="w-8 h-8 rounded flex items-center justify-center"
-                style={{ background: "hsl(38 60% 65% / 0.1)" }}
-              >
+              <div className="w-8 h-8 rounded flex items-center justify-center" style={{ background: "hsl(38 60% 65% / 0.1)" }}>
                 <Icon name={s.icon} size={15} className="text-gold" />
               </div>
               <span
@@ -71,25 +126,100 @@ export function DashboardSection() {
                 {s.delta}
               </span>
             </div>
-            <p className="font-display text-2xl font-medium" style={{ color: "hsl(40 20% 88%)" }}>
-              {s.value}
-            </p>
+            <p className="font-display text-2xl font-medium" style={{ color: "hsl(40 20% 88%)" }}>{s.value}</p>
             <p className="text-xs mt-1" style={{ color: "hsl(40 10% 45%)" }}>{s.label}</p>
           </div>
         ))}
       </div>
 
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="font-display text-lg" style={{ color: "hsl(40 20% 80%)" }}>Последние заказы</h2>
-          <button className="text-xs text-gold hover:underline">Все заказы →</button>
+      {/* Charts row */}
+      <div className="grid grid-cols-3 gap-4">
+
+        {/* Выручка по дням — Area */}
+        <div className="stat-card col-span-2">
+          <div className="flex items-center justify-between mb-5">
+            <h3 className="font-display text-base" style={{ color: "hsl(40 20% 80%)" }}>Выручка по дням, май</h3>
+            <span className="text-xs" style={{ color: "hsl(40 10% 40%)" }}>₽</span>
+          </div>
+          <ResponsiveContainer width="100%" height={160}>
+            <AreaChart data={REVENUE_DATA} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+              <defs>
+                <linearGradient id="revenueGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="hsl(38 60% 65%)" stopOpacity={0.25} />
+                  <stop offset="95%" stopColor="hsl(38 60% 65%)" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <XAxis dataKey="day" tick={{ fill: "hsl(40 10% 40%)", fontSize: 10 }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fill: "hsl(40 10% 40%)", fontSize: 10 }} axisLine={false} tickLine={false} tickFormatter={(v) => `${(v / 1000).toFixed(0)}к`} />
+              <Tooltip
+                contentStyle={CHART_TOOLTIP_STYLE.contentStyle}
+                formatter={(v: number) => [`${v.toLocaleString("ru")} ₽`, "Выручка"]}
+                labelStyle={{ color: "hsl(40 10% 55%)" }}
+              />
+              <Area type="monotone" dataKey="value" stroke="hsl(38 60% 65%)" strokeWidth={1.5} fill="url(#revenueGrad)" dot={false} activeDot={{ r: 4, fill: "hsl(38 60% 65%)" }} />
+            </AreaChart>
+          </ResponsiveContainer>
         </div>
-        <OrdersTable rows={ORDERS.slice(0, 4)} />
+
+        {/* Категории — Pie */}
+        <div className="stat-card">
+          <h3 className="font-display text-base mb-4" style={{ color: "hsl(40 20% 80%)" }}>Категории</h3>
+          <ResponsiveContainer width="100%" height={120}>
+            <PieChart>
+              <Pie data={CATEGORY_PIE} cx="50%" cy="50%" innerRadius={32} outerRadius={52} dataKey="value" strokeWidth={0}>
+                {CATEGORY_PIE.map((_, i) => <Cell key={i} fill={PIE_COLORS[i]} />)}
+              </Pie>
+              <Tooltip
+                contentStyle={CHART_TOOLTIP_STYLE.contentStyle}
+                formatter={(v: number) => [`${v}%`, ""]}
+              />
+            </PieChart>
+          </ResponsiveContainer>
+          <div className="mt-3 space-y-1.5">
+            {CATEGORY_PIE.slice(0, 3).map((c, i) => (
+              <div key={c.name} className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: PIE_COLORS[i] }} />
+                <span className="text-xs flex-1" style={{ color: "hsl(40 10% 55%)" }}>{c.name}</span>
+                <span className="text-xs" style={{ color: "hsl(40 10% 40%)" }}>{c.value}%</span>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div className="stat-card">
-          <h3 className="font-display text-base mb-4" style={{ color: "hsl(40 20% 80%)" }}>Статусы заказов</h3>
+      {/* Заказы по дням — Bar */}
+      <div className="stat-card">
+        <div className="flex items-center justify-between mb-5">
+          <h3 className="font-display text-base" style={{ color: "hsl(40 20% 80%)" }}>Заказы по дням, май</h3>
+          <span className="text-xs" style={{ color: "hsl(40 10% 40%)" }}>шт.</span>
+        </div>
+        <ResponsiveContainer width="100%" height={120}>
+          <BarChart data={ORDERS_DATA} margin={{ top: 0, right: 0, left: -20, bottom: 0 }} barSize={18}>
+            <XAxis dataKey="day" tick={{ fill: "hsl(40 10% 40%)", fontSize: 10 }} axisLine={false} tickLine={false} />
+            <YAxis tick={{ fill: "hsl(40 10% 40%)", fontSize: 10 }} axisLine={false} tickLine={false} allowDecimals={false} />
+            <Tooltip
+              contentStyle={CHART_TOOLTIP_STYLE.contentStyle}
+              formatter={(v: number) => [`${v} шт.`, "Заказы"]}
+              labelStyle={{ color: "hsl(40 10% 55%)" }}
+              cursor={CHART_TOOLTIP_STYLE.cursor}
+            />
+            <Bar dataKey="count" fill="hsl(38 60% 65% / 0.6)" radius={[3, 3, 0, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+
+      {/* Последние заказы + статусы */}
+      <div className="grid grid-cols-3 gap-4">
+        <div className="col-span-2">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-display text-lg" style={{ color: "hsl(40 20% 80%)" }}>Последние заказы</h2>
+            <button className="text-xs text-gold hover:underline">Все заказы →</button>
+          </div>
+          <OrdersTable rows={ORDERS.slice(0, 4)} />
+        </div>
+
+        <div className="stat-card self-start">
+          <h3 className="font-display text-base mb-4" style={{ color: "hsl(40 20% 80%)" }}>Статусы</h3>
           <div className="space-y-3">
             {[
               { label: "В работе", count: 14, pct: 30 },
@@ -109,33 +239,8 @@ export function DashboardSection() {
             ))}
           </div>
         </div>
-
-        <div className="stat-card">
-          <h3 className="font-display text-base mb-4" style={{ color: "hsl(40 20% 80%)" }}>Топ категории</h3>
-          <div className="space-y-2">
-            {[
-              { name: "Памятники с портретом", pct: 38, sum: "698 000 ₽" },
-              { name: "Надгробия", pct: 27, sum: "497 000 ₽" },
-              { name: "Кресты", pct: 18, sum: "331 000 ₽" },
-              { name: "Ограды", pct: 10, sum: "184 000 ₽" },
-              { name: "Прочее", pct: 7, sum: "130 000 ₽" },
-            ].map((c, i) => (
-              <div key={c.name} className="flex items-center gap-3">
-                <span className="text-xs w-4" style={{ color: "hsl(40 10% 40%)" }}>{i + 1}</span>
-                <div className="flex-1">
-                  <div className="flex justify-between text-xs mb-1">
-                    <span style={{ color: "hsl(40 15% 75%)" }}>{c.name}</span>
-                    <span style={{ color: "hsl(40 10% 50%)" }}>{c.sum}</span>
-                  </div>
-                  <div className="h-1 rounded-full" style={{ background: "hsl(20 8% 16%)" }}>
-                    <div className="h-1 rounded-full" style={{ width: `${c.pct}%`, background: "hsl(38 60% 65% / 0.5)" }} />
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
       </div>
+
     </div>
   );
 }
