@@ -1,0 +1,358 @@
+import Icon from "@/components/ui/icon";
+import { ORDERS, CATALOG, CLIENTS, CONTENT_ITEMS, statusColor } from "./data";
+
+/* ── Shared: OrdersTable ────────────────────────────────── */
+export function OrdersTable({ rows }: { rows: typeof ORDERS }) {
+  return (
+    <div className="rounded overflow-hidden" style={{ border: "1px solid hsl(20 8% 13%)" }}>
+      <table className="w-full data-table">
+        <thead style={{ background: "hsl(20 8% 8%)" }}>
+          <tr>
+            <th>№ Заказа</th>
+            <th>Клиент</th>
+            <th>Изделие</th>
+            <th>Статус</th>
+            <th>Дата</th>
+            <th>Сумма</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((o) => (
+            <tr key={o.id} style={{ cursor: "pointer" }}>
+              <td className="font-mono text-xs" style={{ color: "hsl(38 60% 65%)" }}>{o.id}</td>
+              <td>{o.client}</td>
+              <td style={{ color: "hsl(40 10% 60%)" }}>{o.product}</td>
+              <td>
+                <span className={`badge-status ${statusColor[o.status]}`}>{o.status}</span>
+              </td>
+              <td style={{ color: "hsl(40 10% 50%)" }}>{o.date}</td>
+              <td className="font-medium">{o.sum}</td>
+              <td>
+                <button style={{ color: "hsl(40 10% 40%)" }} className="hover:text-gold transition-colors">
+                  <Icon name="ChevronRight" size={14} />
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+/* ── Dashboard ─────────────────────────────────────────── */
+export function DashboardSection() {
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-4 gap-4">
+        {[
+          { label: "Заказов в месяц", value: "47", delta: "+12%", icon: "ClipboardList", up: true },
+          { label: "Выручка (май)", value: "1 840 000 ₽", delta: "+8%", icon: "TrendingUp", up: true },
+          { label: "Активных клиентов", value: "134", delta: "+5", icon: "Users", up: true },
+          { label: "Позиций в каталоге", value: "68", delta: "2 нет в наличии", icon: "Package", up: false },
+        ].map((s) => (
+          <div key={s.label} className="stat-card">
+            <div className="flex items-start justify-between mb-3">
+              <div
+                className="w-8 h-8 rounded flex items-center justify-center"
+                style={{ background: "hsl(38 60% 65% / 0.1)" }}
+              >
+                <Icon name={s.icon} size={15} className="text-gold" />
+              </div>
+              <span
+                className="text-xs px-2 py-0.5 rounded"
+                style={{
+                  background: s.up ? "hsl(150 60% 40% / 0.15)" : "hsl(40 60% 50% / 0.15)",
+                  color: s.up ? "hsl(150 60% 60%)" : "hsl(40 60% 65%)",
+                }}
+              >
+                {s.delta}
+              </span>
+            </div>
+            <p className="font-display text-2xl font-medium" style={{ color: "hsl(40 20% 88%)" }}>
+              {s.value}
+            </p>
+            <p className="text-xs mt-1" style={{ color: "hsl(40 10% 45%)" }}>{s.label}</p>
+          </div>
+        ))}
+      </div>
+
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="font-display text-lg" style={{ color: "hsl(40 20% 80%)" }}>Последние заказы</h2>
+          <button className="text-xs text-gold hover:underline">Все заказы →</button>
+        </div>
+        <OrdersTable rows={ORDERS.slice(0, 4)} />
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div className="stat-card">
+          <h3 className="font-display text-base mb-4" style={{ color: "hsl(40 20% 80%)" }}>Статусы заказов</h3>
+          <div className="space-y-3">
+            {[
+              { label: "В работе", count: 14, pct: 30 },
+              { label: "Готов к выдаче", count: 8, pct: 17 },
+              { label: "Ожидают", count: 19, pct: 40 },
+              { label: "Доставлены", count: 6, pct: 13 },
+            ].map((s) => (
+              <div key={s.label}>
+                <div className="flex justify-between text-xs mb-1" style={{ color: "hsl(40 10% 55%)" }}>
+                  <span>{s.label}</span>
+                  <span>{s.count}</span>
+                </div>
+                <div className="h-1.5 rounded-full" style={{ background: "hsl(20 8% 16%)" }}>
+                  <div className="h-1.5 rounded-full" style={{ width: `${s.pct}%`, background: "hsl(38 60% 65% / 0.7)" }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="stat-card">
+          <h3 className="font-display text-base mb-4" style={{ color: "hsl(40 20% 80%)" }}>Топ категории</h3>
+          <div className="space-y-2">
+            {[
+              { name: "Памятники с портретом", pct: 38, sum: "698 000 ₽" },
+              { name: "Надгробия", pct: 27, sum: "497 000 ₽" },
+              { name: "Кресты", pct: 18, sum: "331 000 ₽" },
+              { name: "Ограды", pct: 10, sum: "184 000 ₽" },
+              { name: "Прочее", pct: 7, sum: "130 000 ₽" },
+            ].map((c, i) => (
+              <div key={c.name} className="flex items-center gap-3">
+                <span className="text-xs w-4" style={{ color: "hsl(40 10% 40%)" }}>{i + 1}</span>
+                <div className="flex-1">
+                  <div className="flex justify-between text-xs mb-1">
+                    <span style={{ color: "hsl(40 15% 75%)" }}>{c.name}</span>
+                    <span style={{ color: "hsl(40 10% 50%)" }}>{c.sum}</span>
+                  </div>
+                  <div className="h-1 rounded-full" style={{ background: "hsl(20 8% 16%)" }}>
+                    <div className="h-1 rounded-full" style={{ width: `${c.pct}%`, background: "hsl(38 60% 65% / 0.5)" }} />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── Orders ─────────────────────────────────────────────── */
+export function OrdersSection() {
+  return (
+    <div className="space-y-5">
+      <div className="flex gap-3">
+        <input
+          placeholder="Поиск заказа..."
+          className="flex-1 px-4 py-2 rounded text-sm outline-none"
+          style={{ background: "hsl(20 8% 9%)", border: "1px solid hsl(20 8% 16%)", color: "hsl(40 15% 80%)" }}
+        />
+        <select
+          className="px-4 py-2 rounded text-sm outline-none"
+          style={{ background: "hsl(20 8% 9%)", border: "1px solid hsl(20 8% 16%)", color: "hsl(40 10% 55%)" }}
+        >
+          <option>Все статусы</option>
+          <option>В работе</option>
+          <option>Готов</option>
+          <option>Ожидает</option>
+          <option>Доставлен</option>
+        </select>
+      </div>
+      <OrdersTable rows={ORDERS} />
+    </div>
+  );
+}
+
+/* ── Catalog ─────────────────────────────────────────────── */
+export function CatalogSection() {
+  return (
+    <div className="space-y-5">
+      <div className="flex gap-3">
+        <input
+          placeholder="Поиск в каталоге..."
+          className="flex-1 px-4 py-2 rounded text-sm outline-none"
+          style={{ background: "hsl(20 8% 9%)", border: "1px solid hsl(20 8% 16%)", color: "hsl(40 15% 80%)" }}
+        />
+        <select
+          className="px-4 py-2 rounded text-sm outline-none"
+          style={{ background: "hsl(20 8% 9%)", border: "1px solid hsl(20 8% 16%)", color: "hsl(40 10% 55%)" }}
+        >
+          <option>Все категории</option>
+          <option>Кресты</option>
+          <option>Надгробия</option>
+          <option>С портретом</option>
+          <option>Ограды</option>
+          <option>Плиты</option>
+        </select>
+      </div>
+      <div className="rounded overflow-hidden" style={{ border: "1px solid hsl(20 8% 13%)" }}>
+        <table className="w-full data-table">
+          <thead style={{ background: "hsl(20 8% 8%)" }}>
+            <tr>
+              <th>Наименование</th>
+              <th>Категория</th>
+              <th>Цена</th>
+              <th>Остаток</th>
+              <th>Статус</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {CATALOG.map((p) => (
+              <tr key={p.name} style={{ cursor: "pointer" }}>
+                <td className="font-medium">{p.name}</td>
+                <td style={{ color: "hsl(40 10% 55%)" }}>{p.category}</td>
+                <td style={{ color: "hsl(38 60% 65%)" }}>{p.price}</td>
+                <td style={{ color: p.stock === 0 ? "hsl(0 62% 50%)" : p.stock < 5 ? "hsl(38 60% 65%)" : "hsl(40 15% 70%)" }}>
+                  {p.stock === 0 ? "—" : `${p.stock} шт.`}
+                </td>
+                <td>
+                  <span className={`badge-status ${statusColor[p.status]}`}>{p.status}</span>
+                </td>
+                <td>
+                  <div className="flex gap-2">
+                    <button style={{ color: "hsl(40 10% 40%)" }} className="hover:text-gold transition-colors">
+                      <Icon name="Pencil" size={13} />
+                    </button>
+                    <button style={{ color: "hsl(40 10% 40%)" }} className="hover:text-red-400 transition-colors">
+                      <Icon name="Trash2" size={13} />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+/* ── Clients ─────────────────────────────────────────────── */
+export function ClientsSection() {
+  return (
+    <div className="space-y-5">
+      <input
+        placeholder="Поиск клиента..."
+        className="w-full max-w-md px-4 py-2 rounded text-sm outline-none"
+        style={{ background: "hsl(20 8% 9%)", border: "1px solid hsl(20 8% 16%)", color: "hsl(40 15% 80%)" }}
+      />
+      <div className="rounded overflow-hidden" style={{ border: "1px solid hsl(20 8% 13%)" }}>
+        <table className="w-full data-table">
+          <thead style={{ background: "hsl(20 8% 8%)" }}>
+            <tr>
+              <th>Клиент</th>
+              <th>Телефон</th>
+              <th>Заказов</th>
+              <th>Сумма всего</th>
+              <th>Последний заказ</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {CLIENTS.map((c) => (
+              <tr key={c.name} style={{ cursor: "pointer" }}>
+                <td>
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="w-7 h-7 rounded-full flex items-center justify-center text-xs flex-shrink-0"
+                      style={{ background: "hsl(38 60% 65% / 0.15)", color: "hsl(38 60% 65%)" }}
+                    >
+                      {c.name.charAt(0)}
+                    </div>
+                    <span className="font-medium">{c.name}</span>
+                  </div>
+                </td>
+                <td style={{ color: "hsl(40 10% 55%)" }} className="font-mono text-xs">{c.phone}</td>
+                <td style={{ color: "hsl(40 15% 75%)" }}>{c.orders}</td>
+                <td style={{ color: "hsl(38 60% 65%)" }} className="font-medium">{c.total}</td>
+                <td style={{ color: "hsl(40 10% 50%)" }}>{c.last}</td>
+                <td>
+                  <button style={{ color: "hsl(40 10% 40%)" }} className="hover:text-gold transition-colors">
+                    <Icon name="ChevronRight" size={14} />
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+/* ── Content ─────────────────────────────────────────────── */
+export function ContentSection() {
+  return (
+    <div className="space-y-5">
+      <div className="flex gap-3">
+        <input
+          placeholder="Поиск контента..."
+          className="flex-1 px-4 py-2 rounded text-sm outline-none"
+          style={{ background: "hsl(20 8% 9%)", border: "1px solid hsl(20 8% 16%)", color: "hsl(40 15% 80%)" }}
+        />
+        <select
+          className="px-4 py-2 rounded text-sm outline-none"
+          style={{ background: "hsl(20 8% 9%)", border: "1px solid hsl(20 8% 16%)", color: "hsl(40 10% 55%)" }}
+        >
+          <option>Все типы</option>
+          <option>Страница</option>
+          <option>Баннер</option>
+          <option>Блок</option>
+        </select>
+      </div>
+      <div className="rounded overflow-hidden" style={{ border: "1px solid hsl(20 8% 13%)" }}>
+        <table className="w-full data-table">
+          <thead style={{ background: "hsl(20 8% 8%)" }}>
+            <tr>
+              <th>Заголовок</th>
+              <th>Тип</th>
+              <th>Обновлён</th>
+              <th>Статус</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {CONTENT_ITEMS.map((c) => (
+              <tr key={c.title} style={{ cursor: "pointer" }}>
+                <td className="font-medium">{c.title}</td>
+                <td>
+                  <span
+                    className="text-xs px-2 py-0.5 rounded"
+                    style={{ background: "hsl(20 8% 14%)", color: "hsl(40 10% 55%)" }}
+                  >
+                    {c.type}
+                  </span>
+                </td>
+                <td style={{ color: "hsl(40 10% 50%)" }}>{c.updated}</td>
+                <td>
+                  <span
+                    className={`badge-status ${
+                      c.status === "Опубликован" || c.status === "Активен"
+                        ? "bg-emerald-900/40 text-emerald-400"
+                        : "bg-slate-700/40 text-slate-400"
+                    }`}
+                  >
+                    {c.status}
+                  </span>
+                </td>
+                <td>
+                  <div className="flex gap-2">
+                    <button style={{ color: "hsl(40 10% 40%)" }} className="hover:text-gold transition-colors">
+                      <Icon name="Pencil" size={13} />
+                    </button>
+                    <button style={{ color: "hsl(40 10% 40%)" }} className="hover:text-red-400 transition-colors">
+                      <Icon name="Trash2" size={13} />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
